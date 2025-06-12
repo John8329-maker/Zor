@@ -1,5 +1,3 @@
-const fetch = require('node-fetch');
-
 exports.handler = async (event) => {
   // Налаштування CORS
   const corsHeaders = {
@@ -36,7 +34,6 @@ exports.handler = async (event) => {
     };
   }
 
-  // Парсинг JSON
   let parsedBody;
   try {
     parsedBody = JSON.parse(event.body);
@@ -70,7 +67,7 @@ exports.handler = async (event) => {
   }
 
   try {
-    // Виклик Together AI API
+    // Виклик Together AI API з використанням нативного fetch
     const response = await fetch('https://api.together.xyz/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -89,12 +86,18 @@ exports.handler = async (event) => {
 
     // Обробка відповіді API
     if (!response.ok) {
-      const errorText = await response.text();
+      let errorText;
+      try {
+        errorText = await response.text();
+      } catch (e) {
+        errorText = response.statusText;
+      }
+      
       return {
         statusCode: response.status,
         headers: corsHeaders,
         body: JSON.stringify({ 
-          error: `Помилка Together AI: ${response.statusText}` 
+          error: `Помилка Together AI: ${response.status} - ${errorText.slice(0, 100)}` 
         })
       };
     }
