@@ -72,8 +72,12 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Перевірити статус відповіді
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP помилка: ${response.status}`);
+        let errorMsg = `HTTP помилка: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMsg = errorData.error || errorMsg;
+        } catch {}
+        throw new Error(errorMsg);
       }
       
       const data = await response.json();
